@@ -1,0 +1,19 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    width: 60%;
+    gap: .5rem 0;
+}
+
+.error {
+    color: #e82626;
+}
+
+.disabled {
+    cursor: not-allowed;
+    &:hover {
+        background: #3e6c21;
+    }
+}

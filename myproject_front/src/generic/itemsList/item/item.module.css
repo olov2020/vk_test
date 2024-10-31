@@ -1,0 +1,25 @@
+.item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    width: 100%;
+    padding: .5rem;
+}
+
+.number {
+    color: #5e19c5;
+    font-size: 2rem;
+}
+
+.delete {
+    width: 2rem;
+    height: 2rem;
+    object-fit: contain;
+
+    transition: all .2s;
+
+    &:hover {
+        transform: scale(1.2);
+    }
+}

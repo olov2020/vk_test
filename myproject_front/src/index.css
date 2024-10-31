@@ -1,0 +1,30 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+
+  scroll-behavior: smooth;
+}
+
+ul {
+  list-style: none;
+}
+
+button {
+  width: 100%;
+  padding: .5rem;
+
+  color: white;
+  background-color: #3e6c21;
+  border: none;
+
+  cursor: pointer;
+
+  &:hover {
+    background-color: #66af38;
+  }
+}
+
+input[type="number"] {
+  outline: none;
+}
