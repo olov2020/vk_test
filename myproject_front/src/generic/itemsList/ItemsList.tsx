@@ -1,10 +1,11 @@
 import Item from "./item/Item.tsx";
-import React, {useState, useRef} from "react";
+import React, {useState, useRef, useEffect} from "react";
 import style from "./itemList.module.css";
+import {List, Pagination} from "antd";
 
 interface Data {
-    id: number,
-    value: string,
+    id: number;
+    value: string;
 }
 
 interface Props {
@@ -13,75 +14,88 @@ interface Props {
 
 const ItemsList: React.FC<Props> = ({items}) => {
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 100; // Number of items to display per page
-    const listRef = useRef<HTMLUListElement>(null); // Reference to the list
-    const [currentItems, setCurrentItems] = useState(items.slice(0, itemsPerPage)); // Initialize with first page's items
-
-    // Calculate the start and end indices for the current page
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
+    const [itemsPerPage, setItemsPerPage] = useState(100); // State for items per page
+    const listRef = useRef<HTMLDivElement>(null); // Reference to the list
+    const [displayedItems, setDisplayedItems] = useState<Data[]>(
+        items.slice(0, itemsPerPage)
+    ); // State for items to be displayed
 
     // Function to handle page changes
     const handlePageChange = (newPage: number) => {
+        if (items.length === 0) {
+            setDisplayedItems([]);
+            return;
+        }
         setCurrentPage(newPage);
-        const newStartIndex = (newPage - 1) * itemsPerPage;
-        const newEndIndex = newStartIndex + itemsPerPage;
-        setCurrentItems(items.slice(newStartIndex, newEndIndex));
-
-        // Optionally scroll to the top of the list when changing pages
+        const startIndex = (newPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        setDisplayedItems(items.slice(startIndex, endIndex));
         if (listRef.current) {
             listRef.current.scrollIntoView({
-                behavior: 'smooth',
+                behavior: "smooth",
             });
         }
     };
 
     // Function to handle item deletion
-    const handleDeleteItem = (index: number) => {
+    const handleDeleteItem = (idToDelete: number) => {
+        const index = items.findIndex((item) => item.id === idToDelete);
         // Update the original items array
         items.splice(index, 1);
 
-        // Update the currentItems state
-        setCurrentItems(items.slice(startIndex, endIndex));
-
-        // Update the page number if necessary
-        if (index < startIndex) {
-            handlePageChange(currentPage - 1);
-        } else if (index >= endIndex && currentPage < Math.ceil(items.length / itemsPerPage)) {
-            handlePageChange(currentPage + 1);
+        // Update the displayedItems state (only if the deleted item was on the current page)
+        if (index >= (currentPage - 1) * itemsPerPage && index < currentPage * itemsPerPage) {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            setDisplayedItems(items.slice(startIndex, endIndex));
         }
     };
 
-    // Generate page numbers
-    const pageNumbers = [];
-    for (let i = 1; i <= Math.ceil(items.length / itemsPerPage); i++) {
-        pageNumbers.push(i);
-    }
+    useEffect(() => {
+        handlePageChange(1);
+    }, [itemsPerPage])
+
+    // Function to handle changing items per page
+    const handleItemsPerPageChange = (current: number, size: number) => {
+        setItemsPerPage(size);
+        handlePageChange(1); // Go to the first page when changing items per page
+    };
 
     return (
         <div ref={listRef} className={style.facts}>
             <h1>Fun facts about numbers</h1>
             <h3>While hovering text you may access input where you can change facts to your own</h3>
-            <ul className={style.list}>
-                {currentItems.map((item: Data, index: number) => (
-                    <Item
-                        value={item.value}
-                        key={item.id}
-                        onDelete={() => handleDeleteItem(index)} // Pass the index in the original array
-                    />
-                ))}
-            </ul>
-            <div className={style.pagination}>
-                {pageNumbers.map((number) => (
-                    <button
-                        key={number}
-                        onClick={() => handlePageChange(number)}
-                        className={currentPage === number ? style.active : ""}
-                    >
-                        {number}
-                    </button>
-                ))}
-            </div>
+            <List
+                style={
+                    items.length === 0 ?
+                        {display: 'none'} :
+                        {display: 'flex'}
+                }
+                className={style.list}
+                itemLayout="horizontal"
+                dataSource={displayedItems} // Use displayedItems for rendering
+                renderItem={(item: Data) => (
+                    <List.Item style={{
+                        width: '60vw',
+                    }}>
+                        <Item
+                            value={item.value}
+                            key={item.id}
+                            onDelete={() => handleDeleteItem(item.id)}
+                        />
+                    </List.Item>
+                )}
+            >
+                <Pagination
+                    className={style.pagination}
+                    defaultCurrent={currentPage}
+                    total={items.length} // Total number of items
+                    pageSize={itemsPerPage}
+                    onChange={handlePageChange}
+                    showSizeChanger // Enable the "Items per page" dropdown
+                    onShowSizeChange={handleItemsPerPageChange} // Handle changes to items per page
+                />
+            </List>
         </div>
     );
 };

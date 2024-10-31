@@ -6,7 +6,7 @@ import YourFact from "./yourFact/YourFact.tsx";
 interface Props {
     value: string,
     key: number,
-    onDelete: () => {},
+    onDelete: (id: number, value: string) => {},
 }
 
 const Item: React.FC<Props> = ({value, key, onDelete}) => {
@@ -16,28 +16,24 @@ const Item: React.FC<Props> = ({value, key, onDelete}) => {
     const [text, setText] = useState(value.slice(value.indexOf(number) + number.length));
 
     return (
-        <li key={key} style={{
-            width: '100%',
-        }}>
-            <div className={style.item}>
-                <p
-                    className={style.text}
-                    onMouseEnter={() => setShowYourFact(true)}
-                    onMouseLeave={() => setShowYourFact(false)}
-                >
-                    <span className={style.number}>{number}</span>{text}
-                </p>
+        <div key={key} className={style.item}>
+            <p
+                className={style.text}
+                onMouseEnter={() => setShowYourFact(true)}
+                onMouseLeave={() => setShowYourFact(false)}
+            >
+                <span className={style.number}>{number}</span>{text}
+            </p>
 
-                {showYourFact && (
-                    <YourFact text={text} setText={setText}
-                              onMouseEnter={() => setShowYourFact(true)}
-                              onMouseLeave={() => setShowYourFact(false)}
-                    />
-                )}
+            {showYourFact && (
+                <YourFact text={text} setText={setText}
+                          onMouseEnter={() => setShowYourFact(true)}
+                          onMouseLeave={() => setShowYourFact(false)}
+                />
+            )}
 
-                <img alt='Delete element' src={trashIcon} onClick={onDelete} className={style.delete}/>
-            </div>
-        </li>
+            <img alt='Delete element' src={trashIcon} onClick={onDelete} className={style.delete}/>
+        </div>
     )
 }
 
