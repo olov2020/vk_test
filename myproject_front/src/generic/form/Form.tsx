@@ -1,29 +1,32 @@
-import React, {useRef, useState} from 'react';
+import React, {useState} from 'react';
 import Input from "./input/Input.tsx";
 import {getListOfItems} from "../../api/userApi.ts";
 import style from './form.module.css'
 import Loading from "../loading/Loading.tsx";
 
-interface Data {
+interface SendData {
     min: number,
     max: number,
 }
 
+interface Data {
+    id: number,
+    value: string,
+}
+
 interface Props {
-    setItems: (newItems: string[]) => void; // Correct type for setItems
+    setItems: (newItems: Data[]) => void; // Correct type for setItems
 }
 
 const Form: React.FC<Props> = ({setItems}) => {
 
-    const [values, setValues] = useState<Data>({min: 0, max: 10});
+    const [values, setValues] = useState<SendData>({min: 0, max: 10});
     const [error, setError] = useState<string | null>(null);
     const [showLoading, setShowLoading] = useState(false);
 
     const validateForm = () => {
-        if (values.min >= values.max || error) {
-            return false;
-        }
-        return true;
+        return !(values.min >= values.max || error);
+
     }
 
     const onSubmit = async (e: React.FormEvent) => {
@@ -38,10 +41,10 @@ const Form: React.FC<Props> = ({setItems}) => {
             return false;
         }
         if (typeof values !== "undefined") {
-            const newItems: string[] = [];
+            const newItems: Data[] = [];
             for (let i = 0; i < 1000; i++) {
                 const data: string = await getListOfItems({...values});
-                newItems.push(data);
+                newItems.push({id: i, value: data});
             }
             setItems(newItems);
         } else {
@@ -51,23 +54,25 @@ const Form: React.FC<Props> = ({setItems}) => {
     }
 
     const onChangeMin = (e) => {
+        e.preventDefault()
         const error = validationCheck(e.target.value);
 
         if (error) {
-            setValues({...values, min: e.target.value});
+            setValues({...values, min: parseInt(e.target.value)});
         }
     }
 
     const onChangeMax = (e) => {
+        e.preventDefault()
         const error = validationCheck(e.target.value);
 
         if (error) {
-            setValues({...values, max: e.target.value});
+            setValues({...values, max: parseInt(e.target.value)});
         }
     }
 
     const validationCheck = (value: string) => {
-        const numValue: number = parseFloat(value);
+        const numValue: number = parseInt(value);
 
         if (numValue < 0 || numValue > 1e9) {
             setError('Value is incorrect');
@@ -88,7 +93,9 @@ const Form: React.FC<Props> = ({setItems}) => {
 
             <button disabled={showLoading} type="submit" className={
                 showLoading ? style.disabled : null
-            }>Get interesting fact!</button>
+            }>
+                Get interesting fact!
+            </button>
 
             {error && <p className={style.error}>{error}</p>}
 

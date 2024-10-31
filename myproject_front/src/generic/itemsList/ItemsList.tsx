@@ -1,12 +1,17 @@
 import Item from "./item/Item.tsx";
-import React, { useState, useRef } from "react";
+import React, {useState, useRef} from "react";
 import style from "./itemList.module.css";
 
-interface Props {
-    items: string[];
+interface Data {
+    id: number,
+    value: string,
 }
 
-const ItemsList: React.FC<Props> = ({ items }) => {
+interface Props {
+    items: Data[];
+}
+
+const ItemsList: React.FC<Props> = ({items}) => {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 100; // Number of items to display per page
     const listRef = useRef<HTMLUListElement>(null); // Reference to the list
@@ -56,12 +61,13 @@ const ItemsList: React.FC<Props> = ({ items }) => {
     return (
         <div ref={listRef} className={style.facts}>
             <h1>Fun facts about numbers</h1>
+            <h3>While hovering text you may access input where you can change facts to your own</h3>
             <ul className={style.list}>
-                {currentItems.map((item: string, index: number) => (
+                {currentItems.map((item: Data, index: number) => (
                     <Item
-                        fact={item}
-                        key={index}
-                        onDelete={() => handleDeleteItem(index + startIndex)} // Pass the index in the original array
+                        value={item.value}
+                        key={item.id}
+                        onDelete={() => handleDeleteItem(index)} // Pass the index in the original array
                     />
                 ))}
             </ul>
