@@ -53,7 +53,8 @@ const ItemsList: React.FC<Props> = ({items}) => {
 
     useEffect(() => {
         handlePageChange(1);
-    }, [itemsPerPage])
+        setDisplayedItems(items.slice(0, itemsPerPage));
+    }, [itemsPerPage, items])
 
     // Function to handle changing items per page
     const handleItemsPerPageChange = (current: number, size: number) => {
